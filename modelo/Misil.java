@@ -21,17 +21,19 @@ public class Misil extends MovingObject{
         this.altitudExplosion = altitudExplosion;
         this.altitudActual = 5000;
         this.explotado = false;
-        evaluado = false;
+        this.evaluado = false;
     }
 
-    public boolean fueraDePantalla() {
-        return position.getY() > Ventana.HEIGHT;
-    }
+    public
+
 
     public double distancia (Avion avion) {
         return Math.abs(altitudExplosion - avion.getAltitud());
     }
 
+    public boolean fueraDePantalla() {
+        return position.getY() > Ventana.HEIGHT;
+    }
     public boolean isExplotado() {
         return explotado;
     }
