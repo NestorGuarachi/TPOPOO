@@ -26,7 +26,7 @@ public class SkyDefenseControlador {
     private boolean gameOver;
 
     // constructor
-    public SkyDefenseControlador(){
+    public SkyDefenseControlador() {
         avion = new Avion(new Vector2D(400, 300), Assets.jugador);
 
         jugador = new Jugador();
@@ -36,12 +36,13 @@ public class SkyDefenseControlador {
 
         gameOver = false;
 
-        nivel = new Nivel (1, 3.0, 5.0, 60, 15); // valores iniciales para el nivel 1
+        nivel = new Nivel(1, 3.0, 5.0, 60, 15); // valores iniciales para el nivel 1
 
         escuadron = new Escuadron(nivel);
-        
+
     }
-    public void realizarNivel (){
+
+    public void realizarNivel() {
         // cuando el jugador sobrevive a todos los drones/misiles
         if (escuadron.escuadronCompletado()) {
             jugador.sumarPuntos(300);
@@ -51,80 +52,67 @@ public class SkyDefenseControlador {
             misiles.clear();
         }
     }
-    
-    public void update(){
 
-        if (gameOver) 
+    public void update() {
+
+        if (gameOver)
             return;
-        
+
 
         // actualizar avion
         avion.update();
 
         // actualizar drones activos
         for (Dron dron : escuadron.getDrones()) {
-            if (dron.isActivo()){
+            if (dron.isActivo())
                 dron.update();
-            }
         }
         // asegurar max 4 drones activos
         escuadron.activarDrones();
 
+        // actualizar todos los misiles
+        for (Misil misil : misiles) {
+            misil.update();
+        }
+        // evaluar explosiones
+        for (Misil misil : misiles) {
+            if (misil.isExplotado() && !misil.isEvaluado()) {
+                misil.aplicarEfecto(avion, jugador);
+            }
+        }
 
         // eliminar misiles fuera de pantalla
         misiles.removeIf(misil -> misil.fueraDePantalla() ||
-            (misil.isExplotado() && misil.getTiempoExplosion() <= 0 && misil.isEvaluado()));
+                (misil.isExplotado() && misil.getTiempoExplosion() <= 0 && misil.isEvaluado()));
 
 
         // contador de disparos
         contadorDisparo++;
-        
+
         // disparo de drones segun frecuencia de nivel
         if (contadorDisparo >= nivel.getFrecuenciaDisparo()) {
             contadorDisparo = 0;
             ArrayList<Dron> dronesActivos = new ArrayList<>();
-            for (Dron dron : escuadron.getDrones()){
+            for (Dron dron : escuadron.getDrones()) {
                 if (dron.isActivo()) dronesActivos.add(dron);
             }
-            if (!dronesActivos.isEmpty()){
-                Dron dron = dronesActivos.get((int)(Math.random() * dronesActivos.size()));
-                int altitudExplosion = 1200 + (int)(Math.random() * (4500 - 1200));
+            if (!dronesActivos.isEmpty()) {
+                Dron dron = dronesActivos.get((int) (Math.random() * dronesActivos.size()));
+                int altitudExplosion = 1200 + (int) (Math.random() * (4500 - 1200));
                 misiles.add(dron.disparar(nivel.getVelocidadMisil(), altitudExplosion));
-            }    
-        }    
-
-       for (Misil misil : misiles) {
-        misil.update();
-        if (misil.isExplotado() && !misil.isEvaluado()) {
-            double distancia = misil.distancia(avion);
-            if (distancia > 150) {
-                jugador.sumarPuntos(40);
-            } else if (distancia > 80) {
-                jugador.sumarPuntos(20);
-                avion.perderEnergia(20);
-            } else if (distancia > 20) {
-                avion.perderEnergia(40);
-            } else {
-                jugador.perderVida();
-                avion.resetEnergia();
             }
-            misil.setEvaluado(true);
         }
-    }
-        // verificar fin de partida 
-        if (!jugador.estaVivo()){
+
+        // verificar fin de partida
+        if (!jugador.estaVivo()) {
             gameOver = true;
         }
 
         // verificar si se completo el nivel
         realizarNivel();
-        
+
     }
-    
-    
 
-
-    
     public void draw(Graphics g){
 
         if (gameOver){
@@ -169,5 +157,4 @@ public class SkyDefenseControlador {
         g.drawString("Energia: " + avion.getEnergia() + "%", 20, 120);
         
     }
-   
 }
