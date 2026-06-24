@@ -13,6 +13,7 @@ import graficos.Assets;
 import input.KeyBoard;
 import states.SkyDefenseControlador;
 
+///
 public class Ventana extends JFrame implements Runnable{
     public static final int WIDTH = 800, HEIGHT = 600;
     private Canvas canvas;
