@@ -7,25 +7,27 @@ import java.awt.image.BufferedImage;
 import main.Ventana;
 import math.Vector2D;
 
-public class Misil extends MovingObject{
+public class Misil extends MovingObject {
 
     private int altitudExplosion;
     private int altitudActual;
     private boolean explotado;
-    private int tiempoExplosion = 30; // frames que dura la explosion
+    private int tiempoExplosion = 30;
     private boolean evaluado;
 
     public Misil(Vector2D position, BufferedImage texture, int altitudExplosion, double velocidadMisil) {
         super(position, new Vector2D(0, velocidadMisil), velocidadMisil, texture);
-
         this.altitudExplosion = altitudExplosion;
         this.altitudActual = 5000;
         this.explotado = false;
         this.evaluado = false;
     }
-    
-    public double distancia (Avion avion) {
-        return Math.abs(altitudExplosion - avion.getAltitud());
+
+    // Distancia en PÍXELES entre la explosión y el avión
+    public double distancia(Avion avion) {
+        double distX = Math.abs(position.getX() - avion.getPosition().getX());
+        double distY = Math.abs(position.getY() - avion.getPosition().getY());
+        return Math.sqrt(distX * distX + distY * distY);
     }
 
     public void aplicarEfecto(Avion avion, Jugador jugador) {
@@ -45,58 +47,46 @@ public class Misil extends MovingObject{
 
         setEvaluado(true);
     }
-    public boolean fueraDePantalla() {
-        return position.getY() > Ventana.HEIGHT;
-    }
-    public boolean isExplotado() {
-        return explotado;
-    }
-    public boolean isEvaluado() {
-        return evaluado;
-    }
-    public void setEvaluado(boolean evaluado) {
-        this.evaluado = evaluado;
-    }
-    public int getTiempoExplosion() {
-        return tiempoExplosion;
-    }
-    public int getAltitudExplosion(){
-        return altitudExplosion;
-    }
+
+    public boolean fueraDePantalla()       { return position.getY() > Ventana.HEIGHT; }
+    public boolean isExplotado()           { return explotado; }
+    public boolean isEvaluado()            { return evaluado; }
+    public void setEvaluado(boolean e)     { evaluado = e; }
+    public int getTiempoExplosion()        { return tiempoExplosion; }
+    public int getAltitudExplosion()       { return altitudExplosion; }
+
+// En Misil.java
 
     @Override
     public void update() {
         if (!explotado) {
-                // mueve el misil en pantalla 
             position = position.add(velocity);
 
-            // sincroniza altitudActual con la posicion Y
-            altitudActual -= 20;
+            // Derivar altitud directamente de la posición visual (fuente de verdad)
+            // Invertimos la fórmula de Avion: posY = (5000 - altitud) / 4000.0 * (HEIGHT - height)
+            // Usamos HEIGHT - 50 igual que el snap de explosión
+            altitudActual = (int) (5000.0 - (position.getY() / (Ventana.HEIGHT - 50)) * 4000.0);
 
-            // explota cuando llega a la altitudExplosion
             if (altitudActual <= altitudExplosion) {
                 explotado = true;
+                double targetY = ((5000.0 - altitudExplosion) / 4000.0) * (Ventana.HEIGHT - 50);
+                position.setY(targetY);
             }
         }
-        
-        if (explotado && tiempoExplosion > 0){
+
+        if (explotado && tiempoExplosion > 0) {
             tiempoExplosion--;
         }
     }
-
     @Override
     public void draw(Graphics g) {
-        if (!explotado){
-            // misil normal
-        g.drawImage(texture, (int) position.getX(), (int) position.getY(), null);
-        } 
-        else if (tiempoExplosion > 0){
-            // explosion visual: circulo rojo
+        if (!explotado) {
+            g.drawImage(texture, (int) position.getX(), (int) position.getY(), null);
+        } else if (tiempoExplosion > 0) {
             g.setColor(Color.RED);
             g.fillOval((int) position.getX() - 20, (int) position.getY() - 20, 40, 40);
-
             g.setColor(Color.ORANGE);
-            g.drawOval((int) position.getX() - 25, (int)position.getY() - 25, 50, 50);
-        }   
+            g.drawOval((int) position.getX() - 25, (int) position.getY() - 25, 50, 50);
+        }
     }
 }

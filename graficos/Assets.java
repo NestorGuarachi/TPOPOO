@@ -18,13 +18,13 @@ public class Assets {
 
     public static void init() {
         // Sprites del juego
-        dron  = Loader.ImageLoader("recursos/ships/spaceStation_030.png");
+        dron  = Loader.ImageLoader("recursos/ships/enemy_C.png");
         misil = Loader.ImageLoader("recursos/ships/spaceMissiles_006.png");
         fondo = Loader.ImageLoader("recursos/fondos/fondo.jpg");
 
-        // Cargar las 3 skins jugables
-        skins[0] = Loader.ImageLoader("recursos/ships/playerShip3_red.png");
-        skins[1] = Loader.ImageLoader("recursos/ships/player.png");
+        // Cargar las 3 skins jugablesx
+        skins[0] = Loader.ImageLoader("recursos/ships/nave1.png");
+        skins[1] = Loader.ImageLoader("recursos/ships/spaceStation_030.png");
         skins[2] = Loader.ImageLoader("recursos/ships/ship_L.png");
 
         // La skin activa empieza siendo la primera

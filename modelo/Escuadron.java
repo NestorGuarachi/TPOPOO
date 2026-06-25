@@ -8,6 +8,8 @@ import main.Ventana;
 public class Escuadron {
     private ArrayList<Dron> drones;
     private Nivel nivel;
+    private static final int MAX_ACTIVOS = 4;
+    private static final double SEPARACION_MIN_Y = 80; // píxeles mínimos entre drones
 
     public Escuadron(Nivel nivel) {
         this.nivel = nivel;
@@ -16,60 +18,69 @@ public class Escuadron {
     }
 
     public void generarDrones() {
-        drones.clear(); // limpia antes de regenerar
-        for (int i = 0; i < 10; i++){
+        drones.clear();
+        for (int i = 0; i < 10; i++) {
             String direccion = Math.random() < 0.5 ? "derecha" : "izquierda";
             double posX = direccion.equals("derecha") ? 0 : Ventana.WIDTH;
-            Dron dron = new Dron(new Vector2D(posX, 50 + Math.random() * 100), Assets.dron, direccion, nivel.getVelocidadDron());
+            // Rango Y ampliado: 30 a 300px para más variedad visual
+            double posY = 30 + Math.random() * 270;
+            Dron dron = new Dron(new Vector2D(posX, posY), Assets.dron, direccion, nivel.getVelocidadDron());
             dron.setActivo(false);
             drones.add(dron);
         }
-        for (int i = 0; i < 4; i++) {
-            drones.get(i).setActivo(true);
+        // Activar los primeros 4 con separación garantizada
+        int activados = 0;
+        for (Dron dron : drones) {
+            if (activados >= MAX_ACTIVOS) break;
+            if (hayEspacioSuficiente(dron)) {
+                dron.setActivo(true);
+                activados++;
+            }
         }
     }
+
+    // Verifica que el candidato tenga al menos SEPARACION_MIN_Y con cada dron ya activo
+    private boolean hayEspacioSuficiente(Dron candidato) {
+        for (Dron dron : drones) {
+            if (dron.isActivo()) {
+                double distY = Math.abs(dron.getPosition().getY() - candidato.getPosition().getY());
+                if (distY < SEPARACION_MIN_Y) return false;
+            }
+        }
+        return true;
+    }
+
     public ArrayList<Dron> getDrones() {
         return drones;
     }
-    // verifica si todos los drones estan inactivos (si el jugador sobrevivio al escuadron)
+
     public boolean escuadronCompletado() {
-
         for (Dron dron : drones) {
-
-            if (!dron.isDestruido()) {
-                return false;
-            }
+            if (!dron.isDestruido()) return false;
         }
-        System.out.println("TODOS COMPLETADOS");
         return true;
     }
-    // reiniciar el escuadron para el siguiente nivel
-    public void reiniciar () {
+
+    public void reiniciar() {
         generarDrones();
     }
-    
-    public void activarDrones() {
 
+    public void activarDrones() {
         int activos = 0;
+        for (Dron dron : drones) {
+            if (dron.isActivo()) activos++;
+        }
+        if (activos >= MAX_ACTIVOS) return;
 
         for (Dron dron : drones) {
-            if (dron.isActivo())
-                activos++;
-            
-        }
-        // activa nuevos drones si hay menos de 4, si ya hay 4 o mas, no se activa ninguno
-        for (Dron dron : drones){
-
-            if (activos >= 4) break;
-
-            if (!dron.isActivo() && !dron.isDestruido()){
-                dron.setActivo(true);
-                activos++;
+            if (activos >= MAX_ACTIVOS) break;
+            if (!dron.isActivo() && !dron.isDestruido()) {
+                // Solo activa si hay separación visual suficiente
+                if (hayEspacioSuficiente(dron)) {
+                    dron.setActivo(true);
+                    activos++;
+                }
             }
-            
         }
     }
-
-    
-    
 }
