@@ -5,6 +5,7 @@ import java.awt.Font;
 import java.awt.Graphics;
 
 import graficos.Assets;
+import input.KeyBoard;
 import math.Vector2D;
 import modelo.Avion;
 import modelo.Dron;
@@ -24,6 +25,7 @@ public class SkyDefenseControlador {
     private Jugador jugador;
     private Nivel nivel;
     private boolean gameOver;
+    private boolean volverAlMenu;
 
     // constructor
     public SkyDefenseControlador() {
@@ -34,7 +36,8 @@ public class SkyDefenseControlador {
         misiles = new ArrayList<>();
         contadorDisparo = 0;
 
-        gameOver = false;
+        gameOver     = false;
+        volverAlMenu = false;
 
         nivel = new Nivel(1, 3.0, 5.0, 60, 15); // valores iniciales para el nivel 1
 
@@ -55,8 +58,10 @@ public class SkyDefenseControlador {
 
     public void update() {
 
-        if (gameOver)
+        if (gameOver) {
+            if (KeyBoard.ESC) volverAlMenu = true;
             return;
+        }
 
 
         // actualizar avion
@@ -115,10 +120,16 @@ public class SkyDefenseControlador {
 
     public void draw(Graphics g){
 
-        if (gameOver){
+        if (gameOver) {
             g.setColor(Color.RED);
             g.setFont(new Font("Arial", Font.BOLD, 50));
             g.drawString("GAME OVER", 220, 300);
+            g.setColor(Color.WHITE);
+            g.setFont(new Font("Courier New", Font.BOLD, 25));
+            g.drawString("Puntos: " + jugador.getPuntos(), 310, 370);
+            g.setColor(Color.YELLOW);
+            g.setFont(new Font("Courier New", Font.PLAIN, 20));
+            g.drawString("Presiona ESC para volver al menu", 175, 430);
             return;
         }
 
@@ -155,10 +166,10 @@ public class SkyDefenseControlador {
         g.drawString("Nivel: " + nivel.getNumeroNivel(), 20, 100);
         g.setColor(Color.GREEN);
         g.drawString("Energia: " + avion.getEnergia() + "%", 20, 120);
-        
+
     }
 
     public boolean debeVolverAlMenu() {
-        return gameOver;
+        return volverAlMenu;
     }
 }

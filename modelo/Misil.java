@@ -33,13 +33,36 @@ public class Misil extends ElementoVolador {
         return Math.sqrt(distX * distX + distY * distY);
     }
 
-    public void aplicarEfecto(Avion avion, Jugador jugador) {
+    // Retorna true si como resultado de la explosión el avión pierde una vida.
+    public boolean aplicarEfecto(Avion avion, Jugador jugador) {
         double d = distancia(avion);
-        if (d > 200)      jugador.sumarPuntos(40);
-        else if (d > 100) { jugador.sumarPuntos(20); avion.perderEnergia(20); }
-        else if (d > 40)  avion.perderEnergia(40);
-        else              { jugador.perderVida(); avion.resetEnergia(); }
+        boolean perdioVida = false;
+
+        if (d > 200) {
+            jugador.sumarPuntos(40);
+        } else if (d > 100) {
+            jugador.sumarPuntos(20);
+            avion.perderEnergia(20);
+            if (avion.getEnergia() == 0) {
+                jugador.perderVida();
+                avion.resetEnergia();
+                perdioVida = true;
+            }
+        } else if (d > 40) {
+            avion.perderEnergia(40);
+            if (avion.getEnergia() == 0) {
+                jugador.perderVida();
+                avion.resetEnergia();
+                perdioVida = true;
+            }
+        } else {
+            jugador.perderVida();
+            avion.resetEnergia();
+            perdioVida = true;
+        }
+
         setEvaluado(true);
+        return perdioVida;
     }
 
     public boolean fueraDePantalla()   { return position.getY() > Ventana.HEIGHT; }
