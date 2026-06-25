@@ -6,10 +6,10 @@ import java.awt.image.BufferedImage;
 import main.Ventana;
 import math.Vector2D;
 
-public class Misil extends ElementoVolador {
+public class Misil extends ElementoVolador implements Destructible {
 
     private int altitudExplosion;
-    private double targetY;       // posición Y en pantalla donde debe explotar
+    private double targetY;
     private boolean explotado;
     private int tiempoExplosion;
     private boolean evaluado;
@@ -20,11 +20,16 @@ public class Misil extends ElementoVolador {
         this.explotado        = false;
         this.evaluado         = false;
         this.tiempoExplosion  = 30;
-
-        // Calcular de una vez la Y visual donde debe explotar,
-        // usando la misma fórmula que Avion usa para su posición Y.
-        // Así la explosión ocurre exactamente cuando el misil llega ahí visualmente.
         this.targetY = ((5000.0 - altitudExplosion) / 4000.0) * (Ventana.HEIGHT - 50);
+    }
+
+    // Implementación de Destructible
+    @Override
+    public void explotar() {
+        if (!explotado) {
+            explotado = true;
+            position.setY(targetY);
+        }
     }
 
     public double distancia(Avion avion) {
@@ -76,13 +81,8 @@ public class Misil extends ElementoVolador {
     public void update() {
         if (!explotado) {
             position = position.add(velocity);
-
-            // Explotar cuando la posición visual llega al targetY
-            // (antes se usaba un contador de altitud separado que no
-            // estaba sincronizado con el movimiento real en pantalla)
             if (position.getY() >= targetY) {
-                explotado = true;
-                position.setY(targetY); // fijar exactamente en el punto de explosión
+                explotar(); // usa el método de Destructible
             }
         }
         if (explotado && tiempoExplosion > 0) tiempoExplosion--;

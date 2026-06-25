@@ -14,39 +14,40 @@ import modelo.Misil;
 import modelo.Nivel;
 import modelo.Jugador;
 
-
 import java.util.ArrayList;
 
 public class SkyDefenseControlador {
+
     private Avion avion;
     private Escuadron escuadron;
     private ArrayList<Misil> misiles;
     private int contadorDisparo;
     private Jugador jugador;
     private Nivel nivel;
+
     private boolean gameOver;
-    private boolean volverAlMenu;
+    private boolean volverAlMenu; // se activa solo cuando el jugador presiona ESC
 
-    // constructor
+    // Notificación temporal "¡Vida perdida!"
+    private boolean mostrarAvisoVida;
+    private int timerAvisoVida;
+
     public SkyDefenseControlador() {
-        avion = new Avion(new Vector2D(400, 300), Assets.jugador);
+        avion   = new Avion(new Vector2D(400, 300), Assets.jugador);
+        jugador = new Jugador(avion);
 
-        jugador = new Jugador();
-
-        misiles = new ArrayList<>();
+        misiles         = new ArrayList<>();
         contadorDisparo = 0;
+        gameOver        = false;
+        volverAlMenu    = false;
+        mostrarAvisoVida = false;
+        timerAvisoVida   = 0;
 
-        gameOver     = false;
-        volverAlMenu = false;
-
-        nivel = new Nivel(1, 3.0, 5.0, 60, 15); // valores iniciales para el nivel 1
-
+        nivel     = new Nivel(1, 3.0, 5.0, 60, 15);
         escuadron = new Escuadron(nivel);
-
     }
 
     public void realizarNivel() {
-        // cuando el jugador sobrevive a todos los drones/misiles
         if (escuadron.escuadronCompletado()) {
             jugador.sumarPuntos(300);
             nivel.incrementarVelocidades();
@@ -58,43 +59,49 @@ public class SkyDefenseControlador {
 
     public void update() {
 
+        // En game over solo esperar ESC para volver al menú
         if (gameOver) {
             if (KeyBoard.ESC) volverAlMenu = true;
             return;
         }
 
-
-        // actualizar avion
+        // Actualizar avión
         avion.update();
 
-        // actualizar drones activos
+        // Actualizar drones activos
         for (Dron dron : escuadron.getDrones()) {
-            if (dron.isActivo())
-                dron.update();
+            if (dron.isActivo()) dron.update();
         }
-        // asegurar max 4 drones activos
         escuadron.activarDrones();
 
-        // actualizar todos los misiles
+        // Actualizar misiles
         for (Misil misil : misiles) {
             misil.update();
         }
-        // evaluar explosiones
+
+        // Evaluar explosiones
         for (Misil misil : misiles) {
             if (misil.isExplotado() && !misil.isEvaluado()) {
-                misil.aplicarEfecto(avion, jugador);
+                boolean perdioVida = misil.aplicarEfecto(avion, jugador);
+                if (perdioVida) {
+                    mostrarAvisoVida = true;
+                    timerAvisoVida   = 120; // 2 segundos a 60 FPS
+                }
             }
         }
 
-        // eliminar misiles fuera de pantalla
+        // Descontar timer del aviso
+        if (mostrarAvisoVida) {
+            timerAvisoVida--;
+            if (timerAvisoVida <= 0) mostrarAvisoVida = false;
+        }
+
+        // Eliminar misiles terminados
         misiles.removeIf(misil -> misil.fueraDePantalla() ||
                 (misil.isExplotado() && misil.getTiempoExplosion() <= 0 && misil.isEvaluado()));
 
-
-        // contador de disparos
+        // Disparos de drones
         contadorDisparo++;
-
-        // disparo de drones segun frecuencia de nivel
         if (contadorDisparo >= nivel.getFrecuenciaDisparo()) {
             contadorDisparo = 0;
             ArrayList<Dron> dronesActivos = new ArrayList<>();
@@ -108,57 +115,52 @@ public class SkyDefenseControlador {
             }
         }
 
-        // verificar fin de partida
+        // Verificar game over
         if (!jugador.estaVivo()) {
             gameOver = true;
         }
 
-        // verificar si se completo el nivel
         realizarNivel();
-
     }
 
-    public void draw(Graphics g){
+    public void draw(Graphics g) {
 
+        // Pantalla de game over
         if (gameOver) {
+            g.setColor(new Color(0, 0, 0, 180));
+            g.fillRect(0, 0, 800, 1000);
+
             g.setColor(Color.RED);
-            g.setFont(new Font("Arial", Font.BOLD, 50));
-            g.drawString("GAME OVER", 220, 300);
+            g.setFont(new Font("Courier New", Font.BOLD, 60));
+            g.drawString("GAME OVER", 185, 380);
+
             g.setColor(Color.WHITE);
-            g.setFont(new Font("Courier New", Font.BOLD, 25));
-            g.drawString("Puntos: " + jugador.getPuntos(), 310, 370);
+            g.setFont(new Font("Courier New", Font.BOLD, 28));
+            g.drawString("Puntos: " + jugador.getPuntos(), 305, 450);
+
             g.setColor(Color.YELLOW);
             g.setFont(new Font("Courier New", Font.PLAIN, 20));
-            g.drawString("Presiona ESC para volver al menu", 175, 430);
+            g.drawString("Presiona ESC para volver al menu", 175, 520);
             return;
         }
 
-        // dibujar avion
+        // Juego normal
         avion.draw(g);
 
-        // dibujar drones activos
         for (Dron dron : escuadron.getDrones()) {
-            if (dron.isActivo()) {
-                dron.draw(g);
-            }
+            if (dron.isActivo()) dron.draw(g);
         }
 
-        // dibujar misiles
         for (Misil misil : misiles) {
             misil.draw(g);
         }
 
-
-        // HUD (informacion del jugador y nivel)
-
-        // fondo semitransparente para el hud
-        g.setColor(new Color(0,0,0,150));
+        // HUD
+        g.setColor(new Color(0, 0, 0, 150));
         g.fillRect(10, 40, 200, 120);
 
-        // fuente retro arcade
         g.setFont(new Font("Courier New", Font.BOLD, 20));
-
-        g.setColor(Color.RED); // color del texto del hud
+        g.setColor(Color.RED);
         g.drawString("Vidas: " + jugador.getVidas(), 20, 60);
         g.setColor(Color.YELLOW);
         g.drawString("Puntos: " + jugador.getPuntos(), 20, 80);
@@ -167,6 +169,12 @@ public class SkyDefenseControlador {
         g.setColor(Color.GREEN);
         g.drawString("Energia: " + avion.getEnergia() + "%", 20, 120);
 
+        // Aviso vida perdida
+        if (mostrarAvisoVida) {
+            g.setFont(new Font("Courier New", Font.BOLD, 30));
+            g.setColor(Color.RED);
+            g.drawString("!VIDA PERDIDA!", 240, 500);
+        }
     }
 
     public boolean debeVolverAlMenu() {
