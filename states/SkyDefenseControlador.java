@@ -157,4 +157,8 @@ public class SkyDefenseControlador {
         g.drawString("Energia: " + avion.getEnergia() + "%", 20, 120);
         
     }
+
+    public boolean debeVolverAlMenu() {
+        return gameOver;
+    }
 }

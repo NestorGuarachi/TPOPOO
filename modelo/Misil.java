@@ -28,21 +28,22 @@ public class Misil extends MovingObject{
         return Math.abs(altitudExplosion - avion.getAltitud());
     }
 
-    public void aplicarEfecto(Avion avion, Jugador jugador){
-        double distancia = distancia (avion);
-        if (distancia > 150){
+    public void aplicarEfecto(Avion avion, Jugador jugador) {
+        double distancia = distancia(avion);
+
+        if (distancia > 200) {
             jugador.sumarPuntos(40);
-        } else if (distancia > 80) {
+        } else if (distancia > 100) {
             jugador.sumarPuntos(20);
             avion.perderEnergia(20);
-        } else if (distancia > 20) {
+        } else if (distancia > 40) {
             avion.perderEnergia(40);
-        }
-        else {
+        } else {
             jugador.perderVida();
             avion.resetEnergia();
         }
-        this.evaluado = true;
+
+        setEvaluado(true);
     }
     public boolean fueraDePantalla() {
         return position.getY() > Ventana.HEIGHT;
