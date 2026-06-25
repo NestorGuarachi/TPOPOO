@@ -5,9 +5,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferStrategy;
-
 import javax.swing.JFrame;
-
 import graficos.Assets;
 import input.KeyBoard;
 import states.MenuControlador;
@@ -28,7 +26,6 @@ public class Ventana extends JFrame implements Runnable {
     private final int FPS = 60;
     private double TARGETTIME = 1000000000.0 / FPS;
     private double delta = 0;
-    private int AVERGEFPS = FPS;
 
     // Máquina de estados
     public enum Estado { MENU, SKIN_SELECTOR, JUGANDO }
@@ -66,7 +63,6 @@ public class Ventana extends JFrame implements Runnable {
         keyBoard.update();
 
         switch (estadoActual) {
-
             case MENU:
                 menuState.update();
                 if (menuState.debeIniciarJuego()) {
@@ -107,7 +103,6 @@ public class Ventana extends JFrame implements Runnable {
 
         g = bs.getDrawGraphics();
 
-        // Fondo: imagen si cargó, negro si no
         if (Assets.fondo != null)
             g.drawImage(Assets.fondo, 0, 0, WIDTH, HEIGHT, null);
         else {
@@ -133,7 +128,7 @@ public class Ventana extends JFrame implements Runnable {
 
     @Override
     public void run() {
-        long now = 0;
+        long now;
         long lastTime = System.nanoTime();
         int frames = 0;
         long time = 0;
@@ -154,7 +149,6 @@ public class Ventana extends JFrame implements Runnable {
             }
 
             if (time >= 1000000000) {
-                AVERGEFPS = frames;
                 frames = 0;
                 time = 0;
             }

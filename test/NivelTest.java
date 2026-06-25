@@ -1,4 +1,5 @@
 package test;
+
 import modelo.Nivel;
 import org.junit.Test;
 import org.junit.Before;
@@ -29,11 +30,12 @@ public class NivelTest {
     }
 
     @Test
-    // verifica que la frecuencia de disparo aumenta un 15% al incrementar el nivel
-    public void testFrecuenciaDisparoAumentaUnQuince() {
+    // verifica que la frecuencia de disparo BAJA un 15% al incrementar el nivel
+    // (menos frames entre disparos = los drones disparan más seguido)
+    public void testFrecuenciaDisparoDisminuyeUnQuince() {
         int frecuenciaAntes = nivel.getFrecuenciaDisparo();
         nivel.incrementarVelocidades();
-        assertEquals((int)(frecuenciaAntes * 1.15), nivel.getFrecuenciaDisparo());
+        assertEquals((int)(frecuenciaAntes * 0.85), nivel.getFrecuenciaDisparo());
     }
 
     @Test
