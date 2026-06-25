@@ -11,8 +11,6 @@ import main.Ventana;
 import math.Vector2D;
 
 public class Avion extends MovingObject {
-
-    
     private AffineTransform at;
     private int altitud;
     private int energia = 100;

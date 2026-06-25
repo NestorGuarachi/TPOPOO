@@ -3,7 +3,6 @@ package main;
 import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.image.BufferStrategy;
 
@@ -15,7 +14,7 @@ import states.SkyDefenseControlador;
 
 ///
 public class Ventana extends JFrame implements Runnable{
-    public static final int WIDTH = 800, HEIGHT = 600;
+    public static final int WIDTH = 1000, HEIGHT = 900;
     private Canvas canvas;
     private Thread thread;
     private boolean running = false;
@@ -52,11 +51,6 @@ public class Ventana extends JFrame implements Runnable{
         setLocationRelativeTo(null);
         setVisible(true);
         canvas.requestFocus();
-
-        
-
-        
-
     }
     
     public static void main(String[] args) {
@@ -79,9 +73,12 @@ public class Ventana extends JFrame implements Runnable{
         g = bs.getDrawGraphics();
 
         //-----------------------
-        g.setColor(Color.BLACK);
-        g.fillRect(0, 0, WIDTH, HEIGHT);
-
+        if (Assets.fondo != null)
+            g.drawImage(Assets.fondo, 0, 0, WIDTH, HEIGHT, null);
+        else {
+            g.setColor(Color.BLACK);
+            g.fillRect(0, 0, WIDTH, HEIGHT);
+        }
         gameState.draw(g);
 
     
@@ -103,8 +100,6 @@ public class Ventana extends JFrame implements Runnable{
         long time = 0;
 
         init();
-
-
 
         while (running) {
             now = System.nanoTime();
@@ -134,7 +129,6 @@ public class Ventana extends JFrame implements Runnable{
          running = true;
          thread = new Thread(this);
          thread.start();
-         
 
     }
     private void stop () {

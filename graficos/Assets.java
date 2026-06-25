@@ -7,13 +7,15 @@ public class Assets {
     public static BufferedImage jugador;
     public static BufferedImage dron;
     public static BufferedImage misil;
+    public static BufferedImage fondo;
     
 
   
     public static void init() {
-        jugador = Loader.ImageLoader("recursos/ships/playerShip3_red.png");
+        jugador = Loader.ImageLoader("recursos/ships/player.png");
         dron = Loader.ImageLoader("recursos/ships/spaceStation_030.png");
         misil = Loader.ImageLoader("recursos/ships/spaceMissiles_006.png");
+        fondo = Loader.ImageLoader("recursos/ships/fondo.jpg");
 
     }
     public static void initParaTests(){
